@@ -1,0 +1,8 @@
+.conda
+__pycache__
+.streamlit
+.venv
+.vscode
+cookies
+prompt_template_app.conda
+*trash
