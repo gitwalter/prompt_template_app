@@ -40,7 +40,6 @@ import streamlit as st
 from prompt_template_database import session, PromptTemplate
 from text_definitions import prompting_principles
 from langchain.prompts import ChatPromptTemplate
-from huggingface_chat import HuggingChatWrapper
 
 
 def create_input_fields(template):
@@ -177,33 +176,15 @@ def use_template():
         
         if st.button("Submit"):
             formatted_message = get_formatted_message(selected_template, inputs)
-            chat_wrapper, query_result = call_llm(
+            _, query_result = call_chatbot(
                 model_name, use_web_search, formatted_message
             )
-                
             st.text_area(
                 label="Prompt", value=formatted_message, height=500, max_chars=None
-            )                        
+            )
             st.markdown("LLM Response")
             st.markdown(query_result)
-            conversations = chat_wrapper.chatbot.get_conversation_list()
-
-            for conversation in conversations:                
-                st.markdown(conversation.id + ' ' + conversation.model + ' ' + conversation.title)
-                for message in conversation.history:
-                    st.markdown(message.id + ' ' + message.role)
-
-            if use_web_search:
-                for source in query_result.web_search_sources:
-                    st.markdown(source.title + ": " + source.link)
-
-            if not keep_chat_on_server:
-                chat_wrapper.reset()
-    
-        if st.sidebar.button("Delete all Chats on Server"):
-            chat_wrapper = HuggingChatWrapper()
-            chat_wrapper.delete_all()
-            st.success("All Chats on Server deleted!")
+        # Server chat management UI removed (no longer relevant)
 
 
 def display_template(selected_template):
@@ -219,22 +200,35 @@ def display_template(selected_template):
     st.write(f"Template: {selected_template.template}")
 
 
-def call_llm(model_name, use_web_search, formatted_message):
+
+# --- Chatbot Wrapper ---
+def call_chatbot(model_name, use_web_search, formatted_message):
     """
-    Call the LLM with the formatted message.
+    Call a chatbot/LLM with the formatted message. Uses ollama if available, otherwise returns a stub response.
 
     Args:
-        model_name (str): The name of the model to use.
-        use_web_search (bool): Whether to use web search.
+        model_name (str): The name of the model to use (ignored in stub).
+        use_web_search (bool): Whether to use web search (ignored in stub).
         formatted_message (str): The formatted message to send to the LLM.
 
     Returns:
-        tuple: A tuple containing the chat wrapper instance and the query result.
+        tuple: (None, str) where str is the chatbot response.
     """
-    chat_wrapper = HuggingChatWrapper()
-    chat_wrapper.switch_model(model_name)
-    query_result = chat_wrapper.chat(formatted_message, use_web_search)
-    return chat_wrapper, query_result
+    try:
+        import requests
+        # Try to use Ollama local server (http://localhost:11434)
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={"model": model_name or "llama2", "prompt": formatted_message}
+        )
+        if response.ok:
+            result = response.json()
+            return None, result.get("response", "[No response from model]")
+        else:
+            return None, f"[Ollama error: {response.text}]"
+    except Exception:
+        # Fallback stub
+        return None, "[Chatbot not implemented. Please configure a local LLM or API call.]"
 
 
 def get_formatted_message(selected_template, inputs):
@@ -264,18 +258,8 @@ def get_model_names():
     Returns:
         list: A list of available model names.
     """
-    if st.session_state["model_names"] == []:
-        try:
-            chat_wrapper = HuggingChatWrapper()
-            model_names = chat_wrapper.get_available_models()
-            st.session_state["model_names"].append(model_names)
-            chat_wrapper.reset()
-        except Exception as e:
-            st.error(e)
-    else:
-        model_names = st.session_state["model_names"][0]
-
-    return model_names
+    # You can expand this list if you have more models in your local LLM setup
+    return ["llama2", "mistral", "phi3"]
 
 
 def maintain_template(template_names, selected_template_name):
