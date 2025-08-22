@@ -2,7 +2,7 @@
 
 The Prompt Template App is a [Streamlit](https://streamlit.io/)-based application for managing and using LLM prompt templates. It leverages [LangChain](https://python.langchain.com/v0.1/docs/modules/model_io/prompts/quick_start/) for prompt management.
 
-Hugging Face Chat integration has been removed and is no longer supported. The app now focuses on creating, editing, and formatting prompts. Optionally, it can send prompts to a locally running LLM (e.g., via Ollama). If no LLM is configured, the app returns a placeholder response.
+
 
 ## Features
 
@@ -70,6 +70,6 @@ The app will POST to `http://localhost:11434/api/generate` from `prompt_template
 └── requirements.txt           # Python dependencies
 ```
 
-Note: The previous Hugging Face Chat integration has been removed from the app UI and flow.
+
 
 Enjoy using the Prompt Template App! 🚀
