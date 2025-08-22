@@ -1,15 +1,16 @@
 # Prompt Template App
 
-The Prompt Template App is a [Streamlit](https://streamlit.io/)-based application designed for managing and utilizing LLM-prompt templates for generating conversational prompts. It leverages [LangChain](https://python.langchain.com/v0.1/docs/modules/model_io/prompts/quick_start/) for prompt management and interacts with [HuggingChat](https://huggingface.co/chat/) chatbots via the unofficial [HuggingChat Python-API](https://github.com/Soulter/hugging-chat-api.git). This app provides a user-friendly interface for creating, editing, and using prompt templates efficiently.
+The Prompt Template App is a [Streamlit](https://streamlit.io/)-based application for managing and using LLM prompt templates. It leverages [LangChain](https://python.langchain.com/v0.1/docs/modules/model_io/prompts/quick_start/) for prompt management.
 
+Hugging Face Chat integration has been removed and is no longer supported. The app now focuses on creating, editing, and formatting prompts. Optionally, it can send prompts to a locally running LLM (e.g., via Ollama). If no LLM is configured, the app returns a placeholder response.
 
 ## Features
 
-- **Edit Template:** Allows users to create new prompt templates or modify existing ones. Users can specify the template's name, topic, purpose, template content, and whether to enable web search.
-  
-- **Use Template:** Enables users to select and utilize existing prompt templates. Users can view details of the selected template, including its topic, name, purpose, and template content. They can also interact with HuggingFace chatbots using the selected template and choose from available models for chat interactions.
+- **Edit Template:** Create new prompt templates or modify existing ones by specifying the name, topic, purpose, template content, and whether to enable the web search flag.
 
-- **Prompting Principles:** Provides users with guiding principles for creating effective prompts, enhancing their understanding of how to design useful templates.
+- **Use Template:** Select and use existing prompt templates. View template details, fill in input variables, optionally toggle the web search flag (UI only), choose a model name, and submit. If a local LLM endpoint is available (see "Optional: Local LLM via Ollama"), the app will send the formatted prompt to it; otherwise, a placeholder response is shown.
+
+- **Prompting Principles:** Review guiding principles for creating effective prompts.
 
 ## Installation
 
@@ -38,21 +39,37 @@ The Prompt Template App is a [Streamlit](https://streamlit.io/)-based applicatio
 
 2. **Use Template:**
    - Select "Use Template" from the sidebar.
-   - Choose an existing template from the dropdown menu to view its details.
-   - Interact with HuggingFace chatbots using the selected template and available models.
+   - Choose an existing template to view details and fill in input variables.
+   - Optionally select a model name and toggle the web search flag.
+   - Click "Submit" to generate the formatted prompt and, if a local LLM is configured, send it to the model and display the response.
 
 3. **Prompting Principles:**
-   - Refer to the guiding principles provided in the app to create effective prompts for better interaction with chatbots.
+   - Refer to the guiding principles provided in the app to craft effective prompts.
+
+## Optional: Local LLM via Ollama
+
+By default, the app returns a placeholder response. To enable local inference:
+
+1. Install [Ollama](https://ollama.com) on your machine.
+2. Pull and run a model (example):
+   ```sh
+   ollama run llama2
+   ```
+3. In the app, select a matching model name (e.g., `llama2`) and submit your prompt.
+
+The app will POST to `http://localhost:11434/api/generate` from `prompt_template_app.py` (function `call_chatbot`). You can customize that function to integrate with other local or remote LLMs.
 
 ## File Structure
 
 ```sh
-├── huggingface_chat.py # Wrapper for calling the HuggingFace LLM chatbot API
-├── import_csv_to_db.py # Program for importing prompt templates from CSV files into the database
-├── prompt_template_app.py # Main application file with logic
-├── prompt_template_database.py # Database file with SQLAlchemy entity PromptTemplate
-├── prompt_templates.db # SQLite database for storing prompt templates wrapped by SQLAlchemy
-└── requirements.txt # Requirements for the Streamlit app
+├── import_csv_to_db.py        # Import prompt templates from CSV into the database
+├── prompt_template_app.py     # Streamlit application
+├── prompt_template_database.py# SQLAlchemy entity and session for templates
+├── text_definitions.py        # Prompting principles and text content
+├── prompt_templates.db        # SQLite database for storing prompt templates
+└── requirements.txt           # Python dependencies
 ```
+
+Note: The previous Hugging Face Chat integration has been removed from the app UI and flow.
 
 Enjoy using the Prompt Template App! 🚀
